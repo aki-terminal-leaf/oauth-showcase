@@ -1,6 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import { ExpressAuth } from "@auth/express";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import Google from "@auth/express/providers/google";
@@ -15,6 +17,7 @@ import { db } from "./db/index.js";
 import { eq } from "drizzle-orm";
 import { accounts } from "./db/schema.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
@@ -65,7 +68,7 @@ const providers = [
 ];
 
 app.use(
-  "/api/auth/*",
+  "/auth/*",
   ExpressAuth({
     providers,
     adapter: DrizzleAdapter(db),
@@ -76,7 +79,6 @@ app.use(
         if (session.user) {
           session.user.id = user.id;
 
-          // Fetch linked account info (provider + scope)
           const userAccounts = await db
             .select({
               provider: accounts.provider,
@@ -86,7 +88,6 @@ app.use(
             .from(accounts)
             .where(eq(accounts.userId, user.id));
 
-          // Attach to session (using type assertion)
           (session as any).account = userAccounts[0] ?? null;
           (session as any).linkedProviders = userAccounts.map((a) => ({
             provider: a.provider,
@@ -125,7 +126,15 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+// Serve frontend static files
+const frontendDist = path.join(__dirname, "../../frontend/dist");
+app.use(express.static(frontendDist));
+app.get("*", (_req, res) => {
+  res.sendFile(path.join(frontendDist, "index.html"));
+});
+
 app.listen(PORT, () => {
-  console.log(`🔐 OAuth Showcase Backend running on http://localhost:${PORT}`);
+  console.log(`🔐 OAuth Showcase running on http://localhost:${PORT}`);
   console.log(`   Providers: Google, GitHub, Discord, X, LINE, Apple, Azure AD, Twitch`);
+  console.log(`   Serving frontend from: ${frontendDist}`);
 });
