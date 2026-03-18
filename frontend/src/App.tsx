@@ -7,6 +7,19 @@ interface User {
   image: string | null;
 }
 
+interface SessionData {
+  user: User | null;
+  account?: {
+    provider: string;
+    scope: string | null;
+    token_type: string | null;
+  };
+  linkedProviders?: Array<{
+    provider: string;
+    scope: string | null;
+  }>;
+}
+
 const PROVIDERS = [
   {
     id: "google",
@@ -66,19 +79,41 @@ const PROVIDERS = [
   },
 ];
 
+const PROVIDER_LABELS: Record<string, { name: string; emoji: string }> = {
+  google: { name: "Google", emoji: "🔵" },
+  github: { name: "GitHub", emoji: "⚫" },
+  discord: { name: "Discord", emoji: "🟣" },
+  twitter: { name: "X (Twitter)", emoji: "⬛" },
+  line: { name: "LINE", emoji: "🟢" },
+  apple: { name: "Apple", emoji: "🍎" },
+  "microsoft-entra-id": { name: "Microsoft", emoji: "🔷" },
+  twitch: { name: "Twitch", emoji: "🟪" },
+};
+
+function ScopeBadge({ scope }: { scope: string }) {
+  return (
+    <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full font-mono">
+      {scope}
+    </span>
+  );
+}
+
 function App() {
-  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/auth/session", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
-        setUser(data?.user ?? null);
+        setSession(data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
+
+  const user = session?.user ?? null;
+  const account = session?.account;
 
   const handleSignIn = (provider: string) => {
     window.location.href = `/api/auth/signin/${provider}`;
@@ -108,23 +143,64 @@ function App() {
 
         <div className="bg-white rounded-2xl shadow-lg p-8">
           {user ? (
-            <div className="text-center">
-              {user.image && (
-                <img
-                  src={user.image}
-                  alt={user.name ?? "User"}
-                  className="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-gray-100"
-                />
-              )}
-              <h2 className="text-xl font-semibold">{user.name}</h2>
-              <p className="text-gray-500 text-sm mb-6">{user.email}</p>
+            <div>
+              {/* User Info */}
+              <div className="text-center mb-6">
+                {user.image && (
+                  <img
+                    src={user.image}
+                    alt={user.name ?? "User"}
+                    className="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-gray-100"
+                  />
+                )}
+                <h2 className="text-xl font-semibold">{user.name}</h2>
+                <p className="text-gray-500 text-sm">{user.email}</p>
+              </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+              {/* Provider Info */}
+              {account && (
+                <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                  <p className="text-xs font-semibold text-blue-600 mb-2">
+                    Authenticated via
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">
+                      {PROVIDER_LABELS[account.provider]?.emoji ?? "🔑"}
+                    </span>
+                    <span className="font-medium text-blue-900">
+                      {PROVIDER_LABELS[account.provider]?.name ??
+                        account.provider}
+                    </span>
+                    {account.token_type && (
+                      <span className="text-xs text-blue-400 ml-auto">
+                        {account.token_type}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Scopes */}
+              {account?.scope && (
+                <div className="bg-green-50 rounded-lg p-4 mb-4">
+                  <p className="text-xs font-semibold text-green-600 mb-2">
+                    Granted Scopes
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {account.scope.split(/[\s,]+/).map((s) => (
+                      <ScopeBadge key={s} scope={s} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Raw Session */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
                 <p className="text-xs font-mono text-gray-400 mb-1">
                   Session Data
                 </p>
-                <pre className="text-xs text-gray-600 overflow-auto">
-                  {JSON.stringify(user, null, 2)}
+                <pre className="text-xs text-gray-600 overflow-auto max-h-40">
+                  {JSON.stringify(session, null, 2)}
                 </pre>
               </div>
 
@@ -165,7 +241,8 @@ function App() {
 
         <div className="text-center mt-6 space-y-2">
           <p className="text-gray-400 text-xs">
-            8 providers · Google · GitHub · Discord · X · LINE · Apple · Microsoft · Twitch
+            8 providers · Google · GitHub · Discord · X · LINE · Apple ·
+            Microsoft · Twitch
           </p>
           <a
             href="https://github.com/aki-terminal-leaf/oauth-showcase"

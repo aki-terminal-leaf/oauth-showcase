@@ -12,6 +12,8 @@ import Apple from "@auth/express/providers/apple";
 import MicrosoftEntraId from "@auth/express/providers/microsoft-entra-id";
 import Twitch from "@auth/express/providers/twitch";
 import { db } from "./db/index.js";
+import { eq } from "drizzle-orm";
+import { accounts } from "./db/schema.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -70,9 +72,26 @@ app.use(
     secret: process.env.AUTH_SECRET,
     trustHost: true,
     callbacks: {
-      session({ session, user }) {
+      async session({ session, user }) {
         if (session.user) {
           session.user.id = user.id;
+
+          // Fetch linked account info (provider + scope)
+          const userAccounts = await db
+            .select({
+              provider: accounts.provider,
+              scope: accounts.scope,
+              token_type: accounts.token_type,
+            })
+            .from(accounts)
+            .where(eq(accounts.userId, user.id));
+
+          // Attach to session (using type assertion)
+          (session as any).account = userAccounts[0] ?? null;
+          (session as any).linkedProviders = userAccounts.map((a) => ({
+            provider: a.provider,
+            scope: a.scope,
+          }));
         }
         return session;
       },
