@@ -28,6 +28,14 @@
 7. **X (Twitter)** — 需要 Developer access 審核
 8. **Apple** — 最複雜，但 iOS App 可能強制要求
 
+## 授權後的應用
+
+拿到 token 之後能做什麼？各平台的 API 能力、進階 scope、程式碼範例和實際應用場景。
+
+→ [授權後的應用](after-auth.md)
+
+---
+
 ## 共通注意事項
 
 ### Callback URL
