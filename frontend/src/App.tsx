@@ -43,6 +43,27 @@ const PROVIDERS = [
     color: "bg-[#06C755] hover:bg-[#05B04C]",
     textColor: "text-white",
   },
+  {
+    id: "apple",
+    name: "Apple",
+    icon: "https://authjs.dev/img/providers/apple.svg",
+    color: "bg-black hover:bg-gray-900",
+    textColor: "text-white",
+  },
+  {
+    id: "microsoft-entra-id",
+    name: "Microsoft",
+    icon: "https://authjs.dev/img/providers/microsoft-entra-id.svg",
+    color: "bg-[#2F2F2F] hover:bg-[#1A1A1A]",
+    textColor: "text-white",
+  },
+  {
+    id: "twitch",
+    name: "Twitch",
+    icon: "https://authjs.dev/img/providers/twitch.svg",
+    color: "bg-[#9146FF] hover:bg-[#7B2FFF]",
+    textColor: "text-white",
+  },
 ];
 
 function App() {
@@ -78,7 +99,6 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">🔐 OAuth Showcase</h1>
           <p className="text-gray-500 text-sm">
@@ -86,7 +106,6 @@ function App() {
           </p>
         </div>
 
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
           {user ? (
             <div className="text-center">
@@ -144,10 +163,9 @@ function App() {
           )}
         </div>
 
-        {/* Footer */}
         <div className="text-center mt-6 space-y-2">
           <p className="text-gray-400 text-xs">
-            Google · GitHub · Discord · X · LINE
+            8 providers · Google · GitHub · Discord · X · LINE · Apple · Microsoft · Twitch
           </p>
           <a
             href="https://github.com/aki-terminal-leaf/oauth-showcase"

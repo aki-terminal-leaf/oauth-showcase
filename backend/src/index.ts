@@ -8,6 +8,9 @@ import GitHub from "@auth/express/providers/github";
 import Discord from "@auth/express/providers/discord";
 import Twitter from "@auth/express/providers/twitter";
 import LINE from "@auth/express/providers/line";
+import Apple from "@auth/express/providers/apple";
+import MicrosoftEntraId from "@auth/express/providers/microsoft-entra-id";
+import Twitch from "@auth/express/providers/twitch";
 import { db } from "./db/index.js";
 
 const app = express();
@@ -44,6 +47,19 @@ const providers = [
     clientId: process.env.LINE_CLIENT_ID,
     clientSecret: process.env.LINE_CLIENT_SECRET,
   }),
+  Apple({
+    clientId: process.env.APPLE_CLIENT_ID,
+    clientSecret: process.env.APPLE_CLIENT_SECRET!,
+  }),
+  MicrosoftEntraId({
+    clientId: process.env.AZURE_AD_CLIENT_ID,
+    clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
+    tenantId: process.env.AZURE_AD_TENANT_ID,
+  }),
+  Twitch({
+    clientId: process.env.TWITCH_CLIENT_ID,
+    clientSecret: process.env.TWITCH_CLIENT_SECRET,
+  }),
 ];
 
 app.use(
@@ -64,7 +80,6 @@ app.use(
   })
 );
 
-// API: Available providers
 app.get("/api/providers", (_req, res) => {
   const available = providers
     .map((p) => {
@@ -75,7 +90,6 @@ app.get("/api/providers", (_req, res) => {
   res.json({ providers: available });
 });
 
-// API: Current user info
 app.get("/api/me", async (req, res) => {
   // @ts-expect-error auth is added by middleware
   const session = req.auth;
@@ -85,15 +99,14 @@ app.get("/api/me", async (req, res) => {
   res.json({ user: session.user });
 });
 
-// Health check
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
-    providers: ["google", "github", "discord", "twitter", "line"],
+    providers: ["google", "github", "discord", "twitter", "line", "apple", "microsoft-entra-id", "twitch"],
   });
 });
 
 app.listen(PORT, () => {
-  console.log(\`🔐 OAuth Showcase Backend running on http://localhost:\${PORT}\`);
-  console.log(\`   Providers: Google, GitHub, Discord, X (Twitter), LINE\`);
+  console.log(`🔐 OAuth Showcase Backend running on http://localhost:${PORT}`);
+  console.log(`   Providers: Google, GitHub, Discord, X, LINE, Apple, Azure AD, Twitch`);
 });
