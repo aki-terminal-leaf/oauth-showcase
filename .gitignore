@@ -1,1 +1,4 @@
-node_modules/\n.env\n*.db\ndist/
+node_modules/
+.env
+*.db
+dist/
