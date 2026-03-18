@@ -5,13 +5,15 @@ import { ExpressAuth } from "@auth/express";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import Google from "@auth/express/providers/google";
 import GitHub from "@auth/express/providers/github";
+import Discord from "@auth/express/providers/discord";
+import Twitter from "@auth/express/providers/twitter";
+import LINE from "@auth/express/providers/line";
 import { db } from "./db/index.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-// CORS for frontend
 app.use(
   cors({
     origin: FRONTEND_URL,
@@ -19,23 +21,35 @@ app.use(
   })
 );
 
-// Trust proxy (for secure cookies behind reverse proxy)
 app.set("trust proxy", 1);
 
-// Auth.js middleware
+const providers = [
+  Google({
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  }),
+  GitHub({
+    clientId: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+  }),
+  Discord({
+    clientId: process.env.DISCORD_CLIENT_ID,
+    clientSecret: process.env.DISCORD_CLIENT_SECRET,
+  }),
+  Twitter({
+    clientId: process.env.TWITTER_CLIENT_ID,
+    clientSecret: process.env.TWITTER_CLIENT_SECRET,
+  }),
+  LINE({
+    clientId: process.env.LINE_CLIENT_ID,
+    clientSecret: process.env.LINE_CLIENT_SECRET,
+  }),
+];
+
 app.use(
   "/api/auth/*",
   ExpressAuth({
-    providers: [
-      Google({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      }),
-      GitHub({
-        clientId: process.env.GITHUB_CLIENT_ID,
-        clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      }),
-    ],
+    providers,
     adapter: DrizzleAdapter(db),
     secret: process.env.AUTH_SECRET,
     trustHost: true,
@@ -50,6 +64,17 @@ app.use(
   })
 );
 
+// API: Available providers
+app.get("/api/providers", (_req, res) => {
+  const available = providers
+    .map((p) => {
+      const provider = typeof p === "function" ? p() : p;
+      return provider.id;
+    })
+    .filter(Boolean);
+  res.json({ providers: available });
+});
+
 // API: Current user info
 app.get("/api/me", async (req, res) => {
   // @ts-expect-error auth is added by middleware
@@ -62,11 +87,13 @@ app.get("/api/me", async (req, res) => {
 
 // Health check
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", providers: ["google", "github"] });
+  res.json({
+    status: "ok",
+    providers: ["google", "github", "discord", "twitter", "line"],
+  });
 });
 
 app.listen(PORT, () => {
-  console.log(`🔐 OAuth Showcase Backend running on http://localhost:${PORT}`);
-  console.log(`   Auth endpoints: http://localhost:${PORT}/api/auth/*`);
-  console.log(`   Frontend URL: ${FRONTEND_URL}`);
+  console.log(\`🔐 OAuth Showcase Backend running on http://localhost:\${PORT}\`);
+  console.log(\`   Providers: Google, GitHub, Discord, X (Twitter), LINE\`);
 });

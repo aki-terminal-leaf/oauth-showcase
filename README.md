@@ -14,9 +14,10 @@ The backend handles all OAuth flows. The frontend is a thin client that redirect
 ## Supported Providers
 
 - 🔵 Google (OpenID Connect)
-- ⚫ GitHub (OAuth 2.0)
+- 🟣 Discord (OAuth 2.0)
+- ⬛ X / Twitter (OAuth 2.0)
+- 🟢 LINE (OpenID Connect)
 
-More coming soon: Discord, X (Twitter), LINE
 
 ## Quick Start
 
@@ -83,3 +84,19 @@ frontend/
 ## License
 
 MIT
+
+### Discord
+1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
+2. New Application → OAuth2 → Add Redirect
+3. Redirect URL: `http://localhost:3001/api/auth/callback/discord`
+
+### X (Twitter)
+1. Go to [X Developer Portal](https://developer.x.com/en/portal/dashboard)
+2. Create Project & App → OAuth 2.0 Settings
+3. Callback URL: `http://localhost:3001/api/auth/callback/twitter`
+4. Requires OAuth 2.0 with PKCE
+
+### LINE
+1. Go to [LINE Developers Console](https://developers.line.biz/console/)
+2. Create Channel → LINE Login
+3. Callback URL: `http://localhost:3001/api/auth/callback/line`

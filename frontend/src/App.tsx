@@ -11,15 +11,36 @@ const PROVIDERS = [
   {
     id: "google",
     name: "Google",
-    icon: "🔵",
+    icon: "https://authjs.dev/img/providers/google.svg",
     color: "bg-white border border-gray-300 hover:bg-gray-50",
     textColor: "text-gray-700",
   },
   {
     id: "github",
     name: "GitHub",
-    icon: "⚫",
+    icon: "https://authjs.dev/img/providers/github.svg",
     color: "bg-gray-900 hover:bg-gray-800",
+    textColor: "text-white",
+  },
+  {
+    id: "discord",
+    name: "Discord",
+    icon: "https://authjs.dev/img/providers/discord.svg",
+    color: "bg-[#5865F2] hover:bg-[#4752C4]",
+    textColor: "text-white",
+  },
+  {
+    id: "twitter",
+    name: "X (Twitter)",
+    icon: "https://authjs.dev/img/providers/twitter.svg",
+    color: "bg-black hover:bg-gray-900",
+    textColor: "text-white",
+  },
+  {
+    id: "line",
+    name: "LINE",
+    icon: "https://authjs.dev/img/providers/line.svg",
+    color: "bg-[#06C755] hover:bg-[#05B04C]",
     textColor: "text-white",
   },
 ];
@@ -68,7 +89,6 @@ function App() {
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
           {user ? (
-            /* Logged in state */
             <div className="text-center">
               {user.image && (
                 <img
@@ -97,7 +117,6 @@ function App() {
               </button>
             </div>
           ) : (
-            /* Logged out state */
             <div>
               <h2 className="text-xl font-semibold text-center mb-6">
                 Sign in with
@@ -109,7 +128,14 @@ function App() {
                     onClick={() => handleSignIn(provider.id)}
                     className={`w-full py-3 px-4 rounded-lg flex items-center justify-center gap-3 font-medium transition-colors ${provider.color} ${provider.textColor}`}
                   >
-                    <span className="text-xl">{provider.icon}</span>
+                    <img
+                      src={provider.icon}
+                      alt={provider.name}
+                      className="w-5 h-5"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
                     Continue with {provider.name}
                   </button>
                 ))}
@@ -119,7 +145,10 @@ function App() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6">
+        <div className="text-center mt-6 space-y-2">
+          <p className="text-gray-400 text-xs">
+            Google · GitHub · Discord · X · LINE
+          </p>
           <a
             href="https://github.com/aki-terminal-leaf/oauth-showcase"
             className="text-gray-400 hover:text-gray-600 text-sm transition-colors"
