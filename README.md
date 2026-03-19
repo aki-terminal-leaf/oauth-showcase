@@ -61,6 +61,19 @@ cd ../backend && npm start
 
 In production, only the backend (port 3001) is needed. The compiled frontend is served directly by Express.
 
+## Progress
+
+| Provider | OAuth App | Credentials | Login Test |
+|----------|:---------:|:-----------:|:----------:|
+| 🔵 Google | ⬜ | ⬜ | ⬜ |
+| ⚫ GitHub | ✅ | ✅ | ✅ |
+| 🟣 Discord | ✅ | ✅ | ✅ |
+| ⬛ X (Twitter) | ⬜ | ⬜ | ⬜ |
+| 🟢 LINE | ⬜ | ⬜ | ⬜ |
+| 🍎 Apple | ⬜ | ⬜ | ⬜ |
+| 🔷 Microsoft | ⬜ | ⬜ | ⬜ |
+| 🟪 Twitch | ⬜ | ⬜ | ⬜ |
+
 ## Setup OAuth Credentials
 
 > **Note:** The callback URLs below use `localhost:3001` for local development.  
