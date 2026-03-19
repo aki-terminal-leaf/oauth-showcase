@@ -15,7 +15,7 @@ import MicrosoftEntraId from "@auth/express/providers/microsoft-entra-id";
 import Twitch from "@auth/express/providers/twitch";
 import { db } from "./db/index.js";
 import { eq } from "drizzle-orm";
-import { accounts } from "./db/schema.js";
+import { accounts, users } from "./db/schema.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -74,6 +74,17 @@ app.use(
     adapter: DrizzleAdapter(db),
     secret: process.env.AUTH_SECRET,
     trustHost: true,
+    events: {
+      async signIn({ user, profile }) {
+        // Update user image on every sign-in
+        if (user.id && profile?.image) {
+          await db
+            .update(users)
+            .set({ image: profile.image })
+            .where(eq(users.id, user.id));
+        }
+      },
+    },
     callbacks: {
       async session({ session, user }) {
         if (session.user) {
