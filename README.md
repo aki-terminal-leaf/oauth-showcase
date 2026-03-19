@@ -32,15 +32,39 @@ npm install
 
 # Copy and configure OAuth credentials
 cp backend/.env.example backend/.env
+# Edit backend/.env with your OAuth client IDs and secrets
 
-# Run both frontend + backend
+# Run both frontend + backend (development)
 npm run dev
 ```
 
-- Backend: http://localhost:3001
-- Frontend: http://localhost:5173
+### Development Mode
+
+Both servers run simultaneously:
+
+| Server | URL | Purpose |
+|--------|-----|---------|
+| Backend | http://localhost:3001 | Express + Auth.js (OAuth flows, API, DB) |
+| Frontend | http://localhost:5173 | Vite dev server (HMR, hot reload) |
+
+Access the app via **http://localhost:5173** during development. Vite proxies `/auth` and `/api` requests to the backend automatically.
+
+### Production Mode
+
+```bash
+# Build the frontend
+cd frontend && npm run build
+
+# Run backend only — it serves the built frontend as static files
+cd ../backend && npm start
+```
+
+In production, only the backend (port 3001) is needed. The compiled frontend is served directly by Express.
 
 ## Setup OAuth Credentials
+
+> **Note:** The callback URLs below use `localhost:3001` for local development.  
+> For deployed environments, replace with your domain (e.g. `https://yourdomain.com/auth/callback/...`).
 
 ### Google
 1. [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → Create OAuth 2.0 Client ID
