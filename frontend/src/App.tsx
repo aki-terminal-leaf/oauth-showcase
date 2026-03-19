@@ -7,6 +7,11 @@ interface User {
   image: string | null;
 }
 
+interface LinkedProvider {
+  provider: string;
+  scope: string | null;
+}
+
 interface SessionData {
   user: User | null;
   account?: {
@@ -14,10 +19,7 @@ interface SessionData {
     scope: string | null;
     token_type: string | null;
   };
-  linkedProviders?: Array<{
-    provider: string;
-    scope: string | null;
-  }>;
+  linkedProviders?: LinkedProvider[];
 }
 
 const PROVIDERS = [
@@ -50,13 +52,31 @@ function ScopeBadge({ scope }: { scope: string }) {
   );
 }
 
+function ProviderCard({ provider, scope }: { provider: string; scope: string | null }) {
+  const label = PROVIDER_LABELS[provider] ?? { name: provider, emoji: "🔑" };
+  const scopes = scope ? scope.split(/[\s,]+/).filter(Boolean) : [];
+
+  return (
+    <div className="flex items-start gap-3 py-2">
+      <span className="text-lg mt-0.5">{label.emoji}</span>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm text-gray-900">{label.name}</p>
+        {scopes.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {scopes.map((s) => <ScopeBadge key={s} scope={s} />)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [csrfToken, setCsrfToken] = useState("");
 
   useEffect(() => {
-    // Fetch session
     fetch("/auth/session", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
@@ -65,7 +85,6 @@ function App() {
       })
       .catch(() => setLoading(false));
 
-    // Fetch CSRF token
     fetch("/auth/csrf", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => setCsrfToken(data.csrfToken))
@@ -73,10 +92,9 @@ function App() {
   }, []);
 
   const user = session?.user ?? null;
-  const account = (session as any)?.account;
+  const linkedProviders = session?.linkedProviders ?? [];
 
   const handleSignIn = (provider: string) => {
-    // Create and submit a form (Auth.js requires POST with CSRF)
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "/auth/signin/" + provider;
@@ -114,6 +132,10 @@ function App() {
     );
   }
 
+  // Providers not yet linked
+  const linkedIds = new Set(linkedProviders.map((lp) => lp.provider));
+  const unlinkedProviders = PROVIDERS.filter((p) => !linkedIds.has(p.id));
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -133,22 +155,31 @@ function App() {
                 <p className="text-gray-500 text-sm">{user.email}</p>
               </div>
 
-              {account && (
+              {linkedProviders.length > 0 && (
                 <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                  <p className="text-xs font-semibold text-blue-600 mb-2">Authenticated via</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{PROVIDER_LABELS[account.provider]?.emoji ?? "🔑"}</span>
-                    <span className="font-medium text-blue-900">{PROVIDER_LABELS[account.provider]?.name ?? account.provider}</span>
-                    {account.token_type && <span className="text-xs text-blue-400 ml-auto">{account.token_type}</span>}
+                  <p className="text-xs font-semibold text-blue-600 mb-2">
+                    Linked Providers ({linkedProviders.length})
+                  </p>
+                  <div className="divide-y divide-blue-100">
+                    {linkedProviders.map((lp) => (
+                      <ProviderCard key={lp.provider} provider={lp.provider} scope={lp.scope} />
+                    ))}
                   </div>
                 </div>
               )}
 
-              {account?.scope && (
-                <div className="bg-green-50 rounded-lg p-4 mb-4">
-                  <p className="text-xs font-semibold text-green-600 mb-2">Granted Scopes</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {account.scope.split(/[\s,]+/).map((s: string) => <ScopeBadge key={s} scope={s} />)}
+              {unlinkedProviders.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs font-semibold text-gray-400 mb-2">Link another account</p>
+                  <div className="space-y-2">
+                    {unlinkedProviders.map((provider) => (
+                      <button key={provider.id} onClick={() => handleSignIn(provider.id)}
+                        className={`w-full py-2 px-3 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-colors ${provider.color} ${provider.textColor}`}>
+                        <img src={provider.icon} alt={provider.name} className="w-4 h-4"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                        {provider.name}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
