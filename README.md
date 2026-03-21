@@ -65,14 +65,14 @@ In production, only the backend (port 3001) is needed. The compiled frontend is 
 
 | Provider | OAuth App | Credentials | Login Test |
 |----------|:---------:|:-----------:|:----------:|
-| 🔵 Google | ⬜ | ⬜ | ⬜ |
+| 🔵 Google | ✅ | ✅ | ✅ |
 | ⚫ GitHub | ✅ | ✅ | ✅ |
 | 🟣 Discord | ✅ | ✅ | ✅ |
 | ⬛ X (Twitter) | ⬜ | ⬜ | ⬜ |
 | 🟢 LINE | ⬜ | ⬜ | ⬜ |
 | 🍎 Apple | ⬜ | ⬜ | ⬜ |
 | 🔷 Microsoft | ⬜ | ⬜ | ⬜ |
-| 🟪 Twitch | ⬜ | ⬜ | ⬜ |
+| 🟪 Twitch | ✅ | ✅ | ✅ |
 
 ## Setup OAuth Credentials
 
